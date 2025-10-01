@@ -1,6 +1,6 @@
 # nix-serve-cloudflared
 
-NixOS module that sets up a Nix binary cache server using `nix-serve-ng` and exposes it through a Cloudflare tunnel.
+NixOS module that sets up a Nix binary cache server using [nix-serve-ng](https://github.com/aristanetworks/nix-serve-ng) and exposes it through a Cloudflare tunnel.
 
 ## Features
 
