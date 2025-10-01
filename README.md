@@ -155,4 +155,4 @@ The public key content is in `cache-pub-key.pem` generated in setup step 2.1.
 
 ## License
 
-GPLv3
+AGPL-3.0
