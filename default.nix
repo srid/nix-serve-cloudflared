@@ -58,7 +58,7 @@ in
           credentialsFile = cfg.cloudflare.credentialsFile;
           default = "http_status:404";
           ingress = {
-            "${cfg.cloudflare.domain}" = "http://localhost:${toString cfg.port}";
+            "${cfg.cloudflare.domain}" = "http://127.0.0.1:${toString cfg.port}";
           };
         };
       };
