@@ -90,17 +90,31 @@ Add to your `flake.nix`:
 In your NixOS configuration:
 
 ```nix
-services.nix-serve-cloudflared = {
-  enable = true;
-  port = 5000;  # Local port (default: 5000)
-  secretKeyPath = "nix-serve-cloudflared/cache-key.pem";  # Relative to secrets/
-  
-  cloudflare = {
-    tunnelId = "your-tunnel-id-from-step-2.3";
-    credentialsPath = "nix-serve-cloudflared/cloudflared-credentials.json";  # Relative to secrets/
-    domain = "cache.example.com";
+{ config, ... }: {
+  # Set up agenix secrets
+  age.secrets."nix-serve-cloudflared/cache-key.pem" = {
+    file = ./secrets/nix-serve-cloudflared/cache-key.pem.age;
+    mode = "0400";
   };
-};
+
+  age.secrets."nix-serve-cloudflared/cloudflared-credentials.json" = {
+    file = ./secrets/nix-serve-cloudflared/cloudflared-credentials.json.age;
+    mode = "0400";
+  };
+
+  # Configure the service
+  services.nix-serve-cloudflared = {
+    enable = true;
+    port = 5000;  # Local port (default: 5000)
+    secretKeyFile = config.age.secrets."nix-serve-cloudflared/cache-key.pem".path;
+
+    cloudflare = {
+      tunnelId = "your-tunnel-id-from-step-2.3";
+      credentialsFile = config.age.secrets."nix-serve-cloudflared/cloudflared-credentials.json".path;
+      domain = "cache.example.com";
+    };
+  };
+}
 ```
 
 ### 4. Test the cache
@@ -134,9 +148,9 @@ The public key content is in `cache-pub-key.pem` generated in setup step 2.1.
 
 - **`enable`**: Enable the nix-serve-ng with Cloudflare tunnel service
 - **`port`**: Local port for nix-serve-ng (default: 5000)
-- **`secretKeyPath`**: Path to encrypted cache signing key relative to `secrets/` (default: "nix-serve-cloudflared/cache-key.pem")
+- **`secretKeyFile`**: Path to the cache signing key file (e.g., from agenix)
 - **`cloudflare.tunnelId`**: Your Cloudflare tunnel ID
-- **`cloudflare.credentialsPath`**: Path to encrypted tunnel credentials relative to `secrets/` (default: "nix-serve-cloudflared/cloudflared-credentials.json")
+- **`cloudflare.credentialsFile`**: Path to the Cloudflare tunnel credentials file (e.g., from agenix)
 - **`cloudflare.domain`**: Public domain name for the cache
 
 ## License
