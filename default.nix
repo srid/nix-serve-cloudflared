@@ -1,7 +1,6 @@
-{ config, lib, pkgs, flake, ... }:
+{ config, lib, pkgs, ... }:
 
 let
-  inherit (flake.inputs) self;
   cfg = config.services.nix-serve-cloudflared;
 in
 {
@@ -14,11 +13,10 @@ in
       description = "Port for nix-serve-ng to listen on";
     };
 
-    secretKeyPath = lib.mkOption {
-      type = lib.types.str;
-      default = "nix-serve-cloudflared/cache-key.pem";
-      description = "Path relative to secrets directory for the cache signing key";
-      example = "nix-serve-cloudflared/cache-key.pem";
+    secretKeyFile = lib.mkOption {
+      type = lib.types.path;
+      description = "Path to the cache signing key file";
+      example = "/run/agenix/nix-serve-cloudflared/cache-key.pem";
     };
 
     cloudflare = {
@@ -27,11 +25,10 @@ in
         description = "Cloudflare tunnel ID";
       };
 
-      credentialsPath = lib.mkOption {
-        type = lib.types.str;
-        default = "nix-serve-cloudflared/cloudflared-credentials.json";
-        description = "Path relative to secrets directory for Cloudflare tunnel credentials";
-        example = "nix-serve-cloudflared/cloudflared-credentials.json";
+      credentialsFile = lib.mkOption {
+        type = lib.types.path;
+        description = "Path to Cloudflare tunnel credentials file";
+        example = "/run/agenix/nix-serve-cloudflared/cloudflared-credentials.json";
       };
 
       domain = lib.mkOption {
@@ -43,20 +40,11 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    age.secrets."${cfg.secretKeyPath}" = {
-      file = self + /secrets/${cfg.secretKeyPath}.age;
-      mode = "0400";
-    };
-
-    age.secrets."${cfg.cloudflare.credentialsPath}" = {
-      file = self + /secrets/${cfg.cloudflare.credentialsPath}.age;
-      mode = "0400";
-    };
 
     services.nix-serve = {
       enable = true;
       port = cfg.port;
-      secretKeyFile = config.age.secrets."${cfg.secretKeyPath}".path;
+      secretKeyFile = cfg.secretKeyFile;
       package = pkgs.nix-serve-ng;
     };
 
@@ -64,7 +52,7 @@ in
       enable = true;
       tunnels = {
         "${cfg.cloudflare.tunnelId}" = {
-          credentialsFile = config.age.secrets."${cfg.cloudflare.credentialsPath}".path;
+          credentialsFile = cfg.cloudflare.credentialsFile;
           default = "http_status:404";
           ingress = {
             "${cfg.cloudflare.domain}" = "http://localhost:${toString cfg.port}";
