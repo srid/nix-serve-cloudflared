@@ -46,6 +46,9 @@ in
       port = cfg.port;
       secretKeyFile = cfg.secretKeyFile;
       package = pkgs.nix-serve-ng;
+      # Set lower priority than official cache (cache.nixos.org is 40)
+      # Higher number = lower priority, so clients prefer official cache first
+      extraParams = "--priority 100";
     };
 
     services.cloudflared = {
