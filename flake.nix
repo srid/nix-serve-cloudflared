@@ -6,5 +6,11 @@
 
   outputs = { self }: {
     nixosModules.default = import ./default.nix;
+    om.ci.default = {
+      example = {
+        dir = "example";
+        overrideInputs.nix-serve-cloudflared = ".";
+      };
+    };
   };
 }
