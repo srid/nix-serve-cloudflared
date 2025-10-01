@@ -153,6 +153,10 @@ The public key content is in `cache-pub-key.pem` generated in setup step 2.1.
 - **`cloudflare.credentialsFile`**: Path to the Cloudflare tunnel credentials file (e.g., from agenix)
 - **`cloudflare.domain`**: Public domain name for the cache
 
+## Examples
+
+- https://github.com/srid/nixos-config/pull/98
+
 ## License
 
 AGPL-3.0
